@@ -128,3 +128,5 @@ astar = WorldAstar(getMap(),1)
 
 
 astar.Astar()
+
+#hello world
