@@ -13,9 +13,12 @@ def getMap():
 			line = line.strip()
 			if len(line) > 0:
 				mapMatrix.append(map(int, line.split()))
+		n = 0
 		for y in (range(0,len(mapMatrix))):
 			for x in (range(0,len(mapMatrix[y]))):
 				mapMatrix[y][x] = Node(y,x,int(mapMatrix[y][x]))
+				print y,x, " ",mapMatrix[y][x].typeN
+			n = n + 1
 		return mapMatrix
 	
 class Node:
@@ -86,11 +89,14 @@ class WorldAstar:
 			print node.x, node.y
 			self.Openl.remove(node)
 			Flist.remove(min_val)
+			#print "test1"
+			#print self.Openl
+			#print
 			if (node.x != self.goalx and node.y != self.goaly):
 				print "not found it yet"
 				print node.x, node.y
 				self.Closedl.append(node)
-				Flist.remove(node.f)
+				#Flist.remove(node.f)
 				node_adj = self.getAdj(node)
 				for n in node_adj:
 					#print "looking at adj"
@@ -111,6 +117,7 @@ class WorldAstar:
 							Flist.append(n.f)
 							print "adding to open"
 							print n.x, n.y
+							#print Flist
 			else:
 				print "found it"
 				break
