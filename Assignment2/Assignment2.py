@@ -13,12 +13,11 @@ def getMap():
 			line = line.strip()
 			if len(line) > 0:
 				mapMatrix.append(map(int, line.split()))
-		n = 0
+				
 		for y in (range(0,len(mapMatrix))):
 			for x in (range(0,len(mapMatrix[y]))):
 				mapMatrix[y][x] = Node(y,x,int(mapMatrix[y][x]))
-				print y,x, " ",mapMatrix[y][x].typeN
-			n = n + 1
+				#print y,x, " ",mapMatrix[y][x].typeN
 		return mapMatrix
 	
 class Node:
@@ -39,12 +38,12 @@ class WorldAstar:
 	#the map starts at the bottom left
 	#where the horse starts is (0,0)
 	def __init__(self,world,htype):
-		self.Openl = []
-		self.Closedl = []
-		self.goalx = len(world)-1
-		self.goaly = len(world[1])-1
+		self.Openl = {}
+		self.Closedl = {}
+		self.goalx = 0
+		self.goaly = len(world[0])-1
 		self.world = world
-		self.start = world[0][0]
+		self.start = world[len(world)-1][0]
 		if htype == 1:
 			self.htype = self.calcManhattan
 		else:
@@ -58,66 +57,51 @@ class WorldAstar:
 	
 	def getAdj(self, baseN):
 		adjl = []
-		for i in range(baseN.y - 1, baseN.y + 2):
-			for j in range(baseN.x - 1, baseN.y + 2):
-				if(i >= 0 and i < len(self.world) and j >= 0 and j < len(self.world[j]) and not(i == baseN.y and j == baseN.x)):
-					if (self.world[j][i].typeN != 2):
-						adjN = self.world[j][i]
+		for x in range(baseN.x - 1, baseN.x + 2):
+			for y in range(baseN.y - 1, baseN.y + 2):
+				if(x >= 0 and x < len(self.world) and y >= 0 and y < len(self.world[x]) and not(x == baseN.x and y == baseN.y)):
+					if (self.world[x][y].typeN != 2):
+						adjN = self.world[x][y]
 						adjl.append(adjN)
 		return adjl
 	
 	def Astar(self):
 		#open and closed lists defined in the class initializer
 		locationseval = 0
-		self.Openl.append(self.start)
-		Flist = []
-		Flist.append(self.start.f)
-		while self.Openl != []:
+		#self.Openl.append(self.start)
+		self.Openl[self.start] = self.start.f
+		while self.Openl != {}:
 			#finds node with smallest cost
-			min_val = min(Flist)
+			min_val = min(self.Openl, key=self.Openl.get)
 			locationseval = locationseval +1
-			#print "min_val"
-			#print min_val
 			for val in self.Openl:
-				print "In open: ", val.x, val.y
-				#try fjdfhjk
-				if (val.f == min_val):
+				if (self.Openl[val] == min_val):
 					node = val
 					print "node with min is at"
 					print node.x, node.y
+					break
 			print "removing node: XXXXXXXX"
 			print node.x, node.y
-			self.Openl.remove(node)
-			Flist.remove(min_val)
-			#print "test1"
-			#print self.Openl
-			#print
+			del self.Openl[node]
+			
 			if (node.x != self.goalx and node.y != self.goaly):
 				print "not found it yet"
 				print node.x, node.y
-				self.Closedl.append(node)
-				#Flist.remove(node.f)
+				self.Closedl[node] = node.f
 				node_adj = self.getAdj(node)
 				for n in node_adj:
 					#print "looking at adj"
 					#print n.x, n.y
 					if (n.typeN != 2 and not(n in self.Closedl)):
 						n.setparent(node,self.htype)#calculates n.f
-						#print "calc f"
-						#print n.f
 						if (n in self.Openl):
 							#print "n is in open"
 							#print node.f + calcCost(n,node)
 							#replace if f(n) is lower than n.f
 							if (n.f > (node.f + calcCost(n,node))):
-								
 								n.f = node.f + calcCost(n,node)
 						else:
-							self.Openl.append(n)
-							Flist.append(n.f)
-							print "adding to open"
-							print n.x, n.y
-							#print Flist
+							self.Openl[n] = n.f
 			else:
 				print "found it"
 				break
@@ -126,7 +110,4 @@ class WorldAstar:
 
 astar = WorldAstar(getMap(),1)
 
-
 astar.Astar()
-
-#hello world
