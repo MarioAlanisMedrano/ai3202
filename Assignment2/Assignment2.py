@@ -13,11 +13,11 @@ def getMap():
 			line = line.strip()
 			if len(line) > 0:
 				mapMatrix.append(map(int, line.split()))
-				
-		for y in (range(0,len(mapMatrix))):
-			for x in (range(0,len(mapMatrix[y]))):
-				mapMatrix[y][x] = Node(y,x,int(mapMatrix[y][x]))
-				#print y,x, " ",mapMatrix[y][x].typeN
+		#print('\n'.join([''.join(['{:4}'.format(item) for item in row]) for row in mapMatrix]))
+		for x in (range(0,len(mapMatrix))):
+			for y in (range(0,len(mapMatrix[x]))):
+				mapMatrix[x][y] = Node(x,y,int(mapMatrix[x][y]))
+				#print x,y, " ",mapMatrix[x][y].typeN
 		return mapMatrix
 	
 class Node:
@@ -41,9 +41,9 @@ class WorldAstar:
 		self.Openl = {}
 		self.Closedl = {}
 		self.goalx = 0
-		self.goaly = len(world[0])-1
+		self.goaly = 9
 		self.world = world
-		self.start = world[len(world)-1][0]
+		self.start = world[7][0]
 		if htype == 1:
 			self.htype = self.calcManhattan
 		else:
@@ -65,33 +65,31 @@ class WorldAstar:
 						adjl.append(adjN)
 		return adjl
 	
+	def getPath(Self,node):
+		print "Path taken:"
+		while (Self.start.x != node.x and Self.start.y != node.y):
+			print "(",node.x,", ",node.y,")"
+			node = node.p
+			
 	def Astar(self):
 		#open and closed lists defined in the class initializer
 		locationseval = 0
-		#self.Openl.append(self.start)
 		self.Openl[self.start] = self.start.f
 		while self.Openl != {}:
 			#finds node with smallest cost
-			min_val = min(self.Openl, key=self.Openl.get)
+			min_val_loc = min(self.Openl, key=self.Openl.get)
+			min_val = self.Openl[min_val_loc]
 			locationseval = locationseval +1
 			for val in self.Openl:
 				if (self.Openl[val] == min_val):
 					node = val
-					print "node with min is at"
-					print node.x, node.y
 					break
-			print "removing node: XXXXXXXX"
-			print node.x, node.y
 			del self.Openl[node]
-			
 			if (node.x != self.goalx and node.y != self.goaly):
-				print "not found it yet"
-				print node.x, node.y
 				self.Closedl[node] = node.f
+				print "adding to close: (",node.x,", ",node.y,")"
 				node_adj = self.getAdj(node)
 				for n in node_adj:
-					#print "looking at adj"
-					#print n.x, n.y
 					if (n.typeN != 2 and not(n in self.Closedl)):
 						n.setparent(node,self.htype)#calculates n.f
 						if (n in self.Openl):
@@ -103,7 +101,8 @@ class WorldAstar:
 						else:
 							self.Openl[n] = n.f
 			else:
-				print "found it"
+				self.getPath(node)
+				print self.goalx, self.goaly
 				break
 #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX	
 
