@@ -54,6 +54,7 @@ class WorldAstar:
 		
 	def calcother(self,x,y):
 		return math.sqrt((x-self.goalx)**2 + (y-self.goaly)**2)
+		return math.sqrt((x-self.goalx)**2 + (y-self.goaly)**2)
 	
 	def getAdj(self, baseN):
 		adjl = []
