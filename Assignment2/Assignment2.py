@@ -1,4 +1,5 @@
 #Assignment2
+#Worked with Brooke Robinson
 import sys
 import math
 
@@ -40,9 +41,9 @@ class WorldAstar:
 	def __init__(self,world,htype):
 		self.Openl = {}
 		self.Closedl = {}
-		self.goal = world[0][9]
+		self.goal = world[0][len(world[0])-1]
 		self.world = world
-		self.start = world[7][0]
+		self.start = world[len(world)-1][0]
 		if htype == 1:
 			self.htype = self.calcManhattan
 		else:
@@ -65,11 +66,18 @@ class WorldAstar:
 						adjl.append(adjN)
 		return adjl
 	
-	def getPath(Self,node):
+	def getPath(self,node):
 		print "Path taken:"
-		while (Self.start.x != node.x and Self.start.y != node.y):
-			print "(",node.x,", ",node.y,")"
+		cost = 0
+		stringArray = []
+		while not(node.x == self.start.x and node.y == self.start.y):
+			stringArray.append(["(",node.x,",",node.y,")"])
+			cost += calcCost(node,node.p)
 			node = node.p
+		stringArray.append(["(",node.x,",",node.y,")"])
+		for nodecoor in reversed(stringArray):
+			print nodecoor[0], nodecoor[1], nodecoor[2], nodecoor[3], nodecoor[4]
+		print "Total Cost: ", cost
 			
 	def Astar(self):
 		#open and closed lists defined in the class initializer
@@ -86,33 +94,24 @@ class WorldAstar:
 					break
 			del self.Openl[node]
 			if (node.x == self.goal.x and node.y == self.goal.y):
-				print "goal: ",self.goal.x, self.goal.y
-				print "current: ", node.x, node.y
-				print "parent of cur: ", node.p.p.p.x, node.p.p.p.y
 				self.getPath(node)
+				print "locations evaluated: ", locationseval
 				break
-			print "adding to close: (",node.x,", ",node.y,")"
+			#print "adding to close: (",node.x,", ",node.y,")"
 			self.Closedl[node] = node.f
 			node_adj = self.getAdj(node)
 			for n in node_adj:
 				if (n.typeN != 2 and not(n in self.Closedl)):
-					n.setparent(node,self.htype)#calculates n.f
-				if not(n in self.Openl) or (n.f > (node.f + calcCost(n,node))):
-					#print "n is in open"
-					#print node.f + calcCost(n,node)
-					#replace if f(n) is lower than n.f
-					#if (n.f > (node.f + calcCost(n,node))):
-					n.f = node.f + calcCost(n,node)
-					#n.setparent(node,self.htype)
-					if not(n in self.Openl):
-						#n.setparent(node,self.htype)
-						self.Openl[n] = n.f
+					if not(n in self.Openl) or (n.f > (node.f + calcCost(n,node))):
+						#replace if f(n) is lower than n.f
+						n.f = node.f + calcCost(n,node)
+						n.setparent(node,self.htype)
+						if not(n in self.Openl):
+							self.Openl[n] = n.f
 #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX	
 
-
-astar = WorldAstar(getMap(),1)
-
-astar.Astar()
-'''print "printing closed list:"
-for noden in astar.Closedl:
-	print noden.x, noden.y'''
+try:
+	astar = WorldAstar(getMap(),int(sys.argv[2]))
+	astar.Astar()
+except:
+	print "please give world file name and heuristic. Ex: python Assignment2.py World1.txt 1"
