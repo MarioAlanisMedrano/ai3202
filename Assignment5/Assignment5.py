@@ -36,29 +36,23 @@ class Node:
 			self.reward = 50.0
 		else:
 			self.reward = 0.0
-		self.cost = 0
 		self.p = None
-		self.f = 0
 		self.uti = 0
 		
-	def setparent(self, parent, h):
+	def setparent(self, parent):
 		self.p = parent
-		self.cost = parent.cost + 10 + int(self.x != parent.x and self.y != parent.y)*4 + self.typeN*10	
-		self.f = self.cost + h(self.x,self.y)
 		
 class WorldAstar:
 	#the map starts at the bottom left
 	#where the horse starts is (0,0)
-	def __init__(self,world,htype):
+	def __init__(self,world):
 		self.Openl = {}
 		self.Closedl = {}
 		self.goal = world[0][len(world[0])-1]
 		self.world = world
 		self.start = world[len(world)-1][0]
-		if htype == 1:
-			self.htype = self.calcManhattan
-		else:
-			self.htype = self.calcother
+		self.htype = self.calcManhattan
+
 			
 	def calcUti(self, epsilon):
 		sigma = 0.0
@@ -66,7 +60,6 @@ class WorldAstar:
 			sigma = 0.0
 			for i in (range(0,len(self.world))):
 				for node in self.world[i]:
-					#print "node :", node.typeN
 					maxnum = self.calcMaxOption(node)
 					utiprime = node.reward + 0.9*maxnum
 					if abs(utiprime - node.uti) > sigma:
@@ -74,7 +67,7 @@ class WorldAstar:
 					node.uti = utiprime
 					if node.typeN == 2:
 						node.uti = 0
-		print('\n'.join(['	'.join(['{0:.2f}'.format(item.uti) for item in row]) for row in self.world]))
+		#print('\n'.join(['	'.join(['{0:.2f}'.format(item.uti) for item in row]) for row in self.world]))
 	
 	def calcMaxOption(self, node):
 		adjlist = self.getAdj(node)
@@ -123,10 +116,6 @@ class WorldAstar:
 	
 	def calcManhattan(self,x,y):
 		return abs(x - self.goal.x) + abs(y - self.goal.y)
-		
-	def calcother(self,x,y):
-		return math.sqrt((x-self.goal.x)**2 + (y-self.goal.y)**2)
-		return math.sqrt((x-self.goal.x)**2 + (y-self.goal.y)**2)
 	
 	def getAdj(self, baseN):
 		adjl = []
@@ -142,23 +131,20 @@ class WorldAstar:
 	
 	def getPath(self,node):
 		print "Path taken:"
-		cost = 0
 		stringArray = []
 		while not(node.x == self.start.x and node.y == self.start.y):
-			stringArray.append(["(",node.x,",",node.y,")"])
-			cost += calcCost(node,node.p)
+			stringArray.append(["(",node.x,",",node.y,")","Utility :",node.uti])
 			node = node.p
-		stringArray.append(["(",node.x,",",node.y,")"])
+		stringArray.append(["(",node.x,",",node.y,")","Utility :",node.uti])
 		for nodecoor in reversed(stringArray):
-			print nodecoor[0], nodecoor[1], nodecoor[2], nodecoor[3], nodecoor[4]
-		print "Total Cost: ", cost
+			print nodecoor[0], nodecoor[1], nodecoor[2], nodecoor[3], nodecoor[4], nodecoor[5], nodecoor[6]
 			
 	def Astar(self):
 		#open and closed lists defined in the class initializer
 		locationseval = 0
-		self.Openl[self.start] = self.start.f
+		self.Openl[self.start] = self.start.uti
 		while self.Openl != {}:
-			#finds node with smallest cost
+			#finds node with smallest utility
 			min_val_loc = min(self.Openl, key=self.Openl.get)
 			min_val = self.Openl[min_val_loc]
 			locationseval = locationseval +1
@@ -169,25 +155,20 @@ class WorldAstar:
 			del self.Openl[node]
 			if (node.x == self.goal.x and node.y == self.goal.y):
 				self.getPath(node)
-				print "locations evaluated: ", locationseval
 				break
-			self.Closedl[node] = node.f
+			self.Closedl[node] = node.uti
 			node_adj = self.getAdj(node)
 			for n in node_adj:
 				if (n.typeN != 2 and not(n in self.Closedl)):
-					if not(n in self.Openl) or (n.f > (node.f + calcCost(n,node))):
-						#replace if f(n) is lower than n.f
-						n.f = node.f + calcCost(n,node)
-						n.setparent(node,self.htype)
+					if not(n in self.Openl) or (n.uti > node.uti):
+						n.setparent(node)
 						if not(n in self.Openl):
-							self.Openl[n] = n.f
+							self.Openl[n] = n.uti
 #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX	
 
-astar = WorldAstar(getMap(),int(sys.argv[2]))
-astar.calcUti(float(sys.argv[3]))
-#try:
-	#astar = WorldAstar(getMap(),int(sys.argv[2]))
-	#astar.calcUti(self, sys.argv[3])
-	#astar.Astar()
-#except:
-	#print "please give world file name and heuristic. Ex: python Assignment2.py World1.txt 1"
+try:
+	astar = WorldAstar(getMap())
+	astar.calcUti(float(sys.argv[2]))
+	astar.Astar()
+except:
+	print "please give world file name and heuristic. Ex: python Assignment5.py World1MDP.txt 0.5"
