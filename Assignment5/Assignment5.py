@@ -61,7 +61,7 @@ class WorldAstar:
 		for x in range(baseN.x - 1, baseN.x + 2):
 			for y in range(baseN.y - 1, baseN.y + 2):
 				if(x >= 0 and x < len(self.world) and y >= 0 and y < len(self.world[x]) and not(x == baseN.x and y == baseN.y)):
-					if not(x == baseN.x-1 and y == baseN.y-1) and not(x == baseN.x+2 and y == baseN.y+2) and not(x == baseN.x-1 and y == baseN.y+2) and not(x == baseN.x+2 and y == baseN.y-1):
+					if not(x == baseN.x-1 and y == baseN.y-1) and not(x == baseN.x+1 and y == baseN.y+1) and not(x == baseN.x-1 and y == baseN.y+1) and not(x == baseN.x+1 and y == baseN.y-1):
 						#the above if statement gets rids of the corners: downleft, uprigth, upleft, downright
 						if (self.world[x][y].typeN != 2):
 							adjN = self.world[x][y]
