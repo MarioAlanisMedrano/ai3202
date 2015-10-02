@@ -1,3 +1,4 @@
+#THIS IS THE EXPERIMENTAL
 #Assignment2
 #Worked with Brooke Robinson
 import sys
@@ -52,6 +53,7 @@ class WorldAstar:
 		self.world = world
 		self.start = world[len(world)-1][0]
 		self.htype = self.calcManhattan
+		self.utiDIC = {}
 
 			
 	def calcUti(self, epsilon):
@@ -62,11 +64,16 @@ class WorldAstar:
 				for node in self.world[i]:
 					maxnum = self.calcMaxOption(node)
 					utiprime = node.reward + 0.9*maxnum
-					if abs(utiprime - node.uti) > sigma:
-						sigma = abs(utiprime - node.uti)
-					node.uti = utiprime
+					#print node.x,node.y
+					if not(node in self.utiDIC):
+						self.utiDIC[node] = 0
+						#print self.utiDIC[node]
+					if abs(utiprime - self.utiDIC[node]) > sigma:
+						sigma = abs(utiprime - self.utiDIC[node])
+					self.utiDIC[node] = utiprime
 					if node.typeN == 2:
-						node.uti = 0
+						self.utiDIC[node] = 0
+					node.uti = self.utiDIC[node]
 		#print('\n'.join(['	'.join(['{0:.2f}'.format(item.uti) for item in row]) for row in self.world]))
 	
 	def calcMaxOption(self, node):
@@ -133,23 +140,23 @@ class WorldAstar:
 		print "Path taken:"
 		stringArray = []
 		while not(node.x == self.start.x and node.y == self.start.y):
-			stringArray.append(["(",node.x,",",node.y,")","Utility :",node.uti])
+			stringArray.append(["(",node.x,",",node.y,")","Utility :",self.utiDIC[node]])
 			node = node.p
-		stringArray.append(["(",node.x,",",node.y,")","Utility :",node.uti])
+		stringArray.append(["(",node.x,",",node.y,")","Utility :",self.utiDIC[node]])
 		for nodecoor in reversed(stringArray):
 			print nodecoor[0], nodecoor[1], nodecoor[2], nodecoor[3], nodecoor[4], nodecoor[5], nodecoor[6]
 			
 	def Astar(self):
 		#open and closed lists defined in the class initializer
 		locationseval = 0
-		self.Openl[self.start] = self.start.uti
+		self.Openl[self.start] = self.utiDIC[self.start]
 		while self.Openl != {}:
-			#finds node with smallest utility
-			min_val_loc = min(self.Openl, key=self.Openl.get)
-			min_val = self.Openl[min_val_loc]
+			#finds node with the biggest utility
+			max_val_loc = max(self.Openl, key=self.Openl.get)
+			max_val = self.Openl[max_val_loc]
 			locationseval = locationseval +1
 			for val in self.Openl:
-				if (self.Openl[val] == min_val):
+				if (self.Openl[val] == max_val):
 					node = val
 					break
 			del self.Openl[node]
@@ -166,9 +173,13 @@ class WorldAstar:
 							self.Openl[n] = n.uti
 #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX	
 
-try:
-	astar = WorldAstar(getMap())
-	astar.calcUti(float(sys.argv[2]))
-	astar.Astar()
-except:
-	print "please give world file name and heuristic. Ex: python Assignment5.py World1MDP.txt 0.5"
+astar = WorldAstar(getMap())
+astar.calcUti(float(sys.argv[2]))
+astar.Astar()
+
+#try:
+	#astar = WorldAstar(getMap())
+	#astar.calcUti(float(sys.argv[2]))
+	#astar.Astar()
+#except:
+	#print "please give world file name and heuristic. Ex: python Assignment5.py World1MDP.txt 0.5"
