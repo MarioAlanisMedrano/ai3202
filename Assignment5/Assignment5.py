@@ -25,10 +25,17 @@ class Node:
 	def __init__(self, x, y, typeN):
 		self.x = x
 		self.y = y
-		self.typeN = typeN #0 = good, 1 == mtn, 2 = wall
+		self.typeN = typeN #0 = good, 1 == mtn, 2 = wall, 3 = snake, 4 = barn
+		if typeN == 1:
+			self.reward = -1
+		elif typeN == 3:
+			self.reward = -2
+		elif typeN == 4:
+			self.reward = 1
 		self.cost = 0
 		self.p = None
 		self.f = 0
+		self.uti = 0
 		
 	def setparent(self, parent, h):
 		self.p = parent
@@ -48,7 +55,47 @@ class WorldAstar:
 			self.htype = self.calcManhattan
 		else:
 			self.htype = self.calcother
-		
+			
+	def calcUti(self, epsilon):
+		sigma = 0
+		while (sigma < (epsilon*(1-0.9)/0.9)):
+			sigma = 0
+			for node in world:
+				maxnum = calcMaxOption(self,node)
+				utiprime = node.reward + 0.9*maxnum
+				if abs(utiprime - node.uti) > sigma:
+					sigma = abs(utiprime - node.uti)
+				node.uti = utiprime
+	
+	def calcMaxOption(self, node):
+		adjlist = self.getAdj(node)
+		listofvalues = []
+		for tempnode in adjlist:
+			if tempnode.x == node.x:
+				#look at changing y values for left and right rewards
+				if (self.world[node.x][node.y+1] in adjlist):
+					nodelook1 = self.world[node.x][node.y+1]
+				else:
+					nodelook1 = 0
+				if (self.world[node.x][node.y-1] in adjlist):
+					nodelook2 = self.world[node.x][node.y-1]
+				else:
+					nodelook2 = 0
+				listofvalues.append(.8(tempnode.reward) + .1(nodelook1.reward) + .1(nodelook2.reward))
+			elif tempnode.y == node.y:
+				#look at changing x values for left and right rewards
+				if (self.world[node.x+1][node.y] in adjlist):
+					nodelook1 = self.world[node.x+1][node.y]
+				else:
+					nodelook1 = 0
+				if (self.world[node.x-1][node.y] in adjlist):
+					nodelook2 = self.world[node.x-1][node.y]
+				else:
+					nodelook2 = 0
+				listofvalues.append(.8(tempnode.reward) + .1(nodelook1.reward) + .1(nodelook2.reward))
+		#the loop ran through the entire list of adj nodes, select max values
+		return max(listofvalues)
+	
 	def calcManhattan(self,x,y):
 		return abs(x - self.goal.x) + abs(y - self.goal.y)
 		
@@ -99,7 +146,6 @@ class WorldAstar:
 				self.getPath(node)
 				print "locations evaluated: ", locationseval
 				break
-			#print "adding to close: (",node.x,", ",node.y,")"
 			self.Closedl[node] = node.f
 			node_adj = self.getAdj(node)
 			for n in node_adj:
@@ -114,6 +160,7 @@ class WorldAstar:
 
 try:
 	astar = WorldAstar(getMap(),int(sys.argv[2]))
+	astar.calcUti(self, sys.argv[3])
 	astar.Astar()
 except:
 	print "please give world file name and heuristic. Ex: python Assignment2.py World1.txt 1"
