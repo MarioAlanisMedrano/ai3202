@@ -26,12 +26,18 @@ class Node:
 		self.x = x
 		self.y = y
 		self.typeN = typeN #0 = good, 1 == mtn, 2 = wall, 3 = snake, 4 = barn
-		if typeN == 1:
-			self.reward = -1
+		if typeN == 0:
+			self.reward = 0.0
+		elif typeN == 1:
+			self.reward = -1.0
+		elif typeN == 2:
+			self.reward = 0.0
 		elif typeN == 3:
-			self.reward = -2
+			self.reward = -2.0
 		elif typeN == 4:
-			self.reward = 1
+			self.reward = 1.0
+		elif typeN == 50:
+			self.reward = 50
 		self.cost = 0
 		self.p = None
 		self.f = 0
@@ -57,15 +63,18 @@ class WorldAstar:
 			self.htype = self.calcother
 			
 	def calcUti(self, epsilon):
-		sigma = 0
-		while (sigma < (epsilon*(1-0.9)/0.9)):
-			sigma = 0
-			for node in world:
-				maxnum = calcMaxOption(self,node)
-				utiprime = node.reward + 0.9*maxnum
-				if abs(utiprime - node.uti) > sigma:
-					sigma = abs(utiprime - node.uti)
-				node.uti = utiprime
+		sigma = 0.0
+		while (sigma < (epsilon*(1.0-0.9)/0.9)):
+			sigma = 0.0
+			for i in (range(0,len(self.world))):
+				for node in self.world[i]:
+					#print "node :", node.typeN
+					maxnum = self.calcMaxOption(node)
+					utiprime = node.reward + 0.9*maxnum
+					if abs(utiprime - node.uti) > sigma:
+						sigma = abs(utiprime - node.uti)
+					node.uti = utiprime
+		print('\n'.join([''.join(['{:7}'.format(item.uti) for item in row]) for row in self.world]))
 	
 	def calcMaxOption(self, node):
 		adjlist = self.getAdj(node)
@@ -73,26 +82,42 @@ class WorldAstar:
 		for tempnode in adjlist:
 			if tempnode.x == node.x:
 				#look at changing y values for left and right rewards
-				if (self.world[node.x][node.y+1] in adjlist):
-					nodelook1 = self.world[node.x][node.y+1]
-				else:
-					nodelook1 = 0
-				if (self.world[node.x][node.y-1] in adjlist):
-					nodelook2 = self.world[node.x][node.y-1]
-				else:
-					nodelook2 = 0
-				listofvalues.append(.8(tempnode.reward) + .1(nodelook1.reward) + .1(nodelook2.reward))
+				if (tempnode.y >= 0 and tempnode.y < len(self.world[0])-1):
+					if ((self.world[tempnode.x][tempnode.y+1]) in adjlist):
+						nodelook1 = self.world[node.x][node.y+1]
+					else:
+						nodelook1 = 0.0
+					if (self.world[node.x][node.y-1] in adjlist):
+						nodelook2 = self.world[node.x][node.y-1]
+					else:
+						nodelook2 = 0.0
+					if (nodelook1 == 0.0) and (nodelook2 == 0.0):
+						listofvalues.append(0.8*(tempnode.reward) + 0.1*(nodelook1) + 0.1*(nodelook2))
+					elif nodelook1 == 0.0:
+						listofvalues.append(0.8*(tempnode.reward) + 0.1*(nodelook1) + 0.1*(nodelook2.reward))
+					elif nodelook2 == 0.0:
+						listofvalues.append(0.8*(tempnode.reward) + 0.1*(nodelook1.reward) + 0.1*(nodelook2))
+					else:
+						listofvalues.append(0.8*(tempnode.reward) + 0.1*(nodelook1.reward) + 0.1*(nodelook2.reward))
 			elif tempnode.y == node.y:
 				#look at changing x values for left and right rewards
-				if (self.world[node.x+1][node.y] in adjlist):
-					nodelook1 = self.world[node.x+1][node.y]
-				else:
-					nodelook1 = 0
-				if (self.world[node.x-1][node.y] in adjlist):
-					nodelook2 = self.world[node.x-1][node.y]
-				else:
-					nodelook2 = 0
-				listofvalues.append(.8(tempnode.reward) + .1(nodelook1.reward) + .1(nodelook2.reward))
+				if (tempnode.x >= 0 and tempnode.x < len(self.world)-1):
+					if (self.world[tempnode.x+1][tempnode.y] in adjlist):
+						nodelook1 = self.world[node.x+1][node.y]
+					else:
+						nodelook1 = 0.0
+					if (self.world[node.x-1][node.y] in adjlist):
+						nodelook2 = self.world[node.x-1][node.y]
+					else:
+						nodelook2 = 0.0
+					if (nodelook1 == 0.0) and (nodelook2 == 0.0):
+						listofvalues.append(0.8*(tempnode.reward) + 0.1*(nodelook1) + 0.1*(nodelook2))
+					elif nodelook1 == 0.0:
+						listofvalues.append(0.8*(tempnode.reward) + 0.1*(nodelook1) + 0.1*(nodelook2.reward))
+					elif nodelook2 == 0.0:
+						listofvalues.append(0.8*(tempnode.reward) + 0.1*(nodelook1.reward) + 0.1*(nodelook2))
+					else:
+						listofvalues.append(0.8*(tempnode.reward) + 0.1*(nodelook1.reward) + 0.1*(nodelook2.reward))
 		#the loop ran through the entire list of adj nodes, select max values
 		return max(listofvalues)
 	
@@ -158,9 +183,11 @@ class WorldAstar:
 							self.Openl[n] = n.f
 #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX	
 
-try:
-	astar = WorldAstar(getMap(),int(sys.argv[2]))
-	astar.calcUti(self, sys.argv[3])
-	astar.Astar()
-except:
-	print "please give world file name and heuristic. Ex: python Assignment2.py World1.txt 1"
+astar = WorldAstar(getMap(),int(sys.argv[2]))
+astar.calcUti(float(sys.argv[3]))
+#try:
+	#astar = WorldAstar(getMap(),int(sys.argv[2]))
+	#astar.calcUti(self, sys.argv[3])
+	#astar.Astar()
+#except:
+	#print "please give world file name and heuristic. Ex: python Assignment2.py World1.txt 1"
