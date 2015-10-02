@@ -26,18 +26,16 @@ class Node:
 		self.x = x
 		self.y = y
 		self.typeN = typeN #0 = good, 1 == mtn, 2 = wall, 3 = snake, 4 = barn
-		if typeN == 0:
-			self.reward = 0.0
-		elif typeN == 1:
+		if typeN == 1:
 			self.reward = -1.0
-		elif typeN == 2:
-			self.reward = 0.0
 		elif typeN == 3:
 			self.reward = -2.0
 		elif typeN == 4:
 			self.reward = 1.0
 		elif typeN == 50:
-			self.reward = 50
+			self.reward = 50.0
+		else:
+			self.reward = 0.0
 		self.cost = 0
 		self.p = None
 		self.f = 0
@@ -74,7 +72,9 @@ class WorldAstar:
 					if abs(utiprime - node.uti) > sigma:
 						sigma = abs(utiprime - node.uti)
 					node.uti = utiprime
-		print('\n'.join([''.join(['{:7}'.format(item.uti) for item in row]) for row in self.world]))
+					if node.typeN == 2:
+						node.uti = 0
+		print('\n'.join(['	'.join(['{0:.2f}'.format(item.uti) for item in row]) for row in self.world]))
 	
 	def calcMaxOption(self, node):
 		adjlist = self.getAdj(node)
