@@ -1,4 +1,4 @@
-#THIS IS THE EXPERIMENTAL
+#THIS IS THE EXPERIMENTAL!
 #Assignment2
 #Worked with Brooke Robinson
 import sys
