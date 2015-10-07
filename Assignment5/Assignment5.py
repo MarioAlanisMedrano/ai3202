@@ -38,7 +38,6 @@ class Node:
 		else:
 			self.reward = 0.0
 		self.p = None
-		self.uti = 0
 		
 	def setparent(self, parent):
 		self.p = parent
@@ -73,8 +72,7 @@ class WorldAstar:
 					self.utiDIC[node] = utiprime
 					if node.typeN == 2:
 						self.utiDIC[node] = 0
-					node.uti = self.utiDIC[node]
-		#print('\n'.join(['	'.join(['{0:.2f}'.format(item.uti) for item in row]) for row in self.world]))
+		print('\n'.join(['	'.join(['{0:.2f}'.format(self.utiDIC[item]) for item in row]) for row in self.world]))
 	
 	def calcMaxOption(self, node):
 		adjlist = self.getAdj(node)
@@ -163,14 +161,14 @@ class WorldAstar:
 			if (node.x == self.goal.x and node.y == self.goal.y):
 				self.getPath(node)
 				break
-			self.Closedl[node] = node.uti
+			self.Closedl[node] = self.utiDIC[node]#XXXXXXXXXX
 			node_adj = self.getAdj(node)
 			for n in node_adj:
 				if (n.typeN != 2 and not(n in self.Closedl)):
-					if not(n in self.Openl) or (n.uti > node.uti):
+					if not(n in self.Openl) or (self.utiDIC[n] > self.utiDIC[node]):#XXXXXXXXX
 						n.setparent(node)
 						if not(n in self.Openl):
-							self.Openl[n] = n.uti
+							self.Openl[n] = self.utiDIC[n]#xxxxxxxxxxx
 #XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX	
 
 astar = WorldAstar(getMap())
