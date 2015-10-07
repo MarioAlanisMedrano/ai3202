@@ -1,5 +1,5 @@
-#THIS IS THE EXPERIMENTAL!
-#Assignment2
+#Assignment5
+#Markov Decision Proccess/Problem
 #Worked with Brooke Robinson
 import sys
 import math
@@ -53,26 +53,34 @@ class WorldAstar:
 		self.start = world[len(world)-1][0]
 		self.htype = self.calcManhattan
 		self.utiDIC = {}
+		self.utiDICp = {}
 
 			
 	def calcUti(self, epsilon):
-		sigma = 0.0
-		while (sigma < (epsilon*(1.0-0.9)/0.9)):
-			sigma = 0.0
+		#creates empty dictionary
+		for i in (range(0,len(self.world))):
+			for node in self.world[i]:
+				self.utiDIC[node] = 0.0
+				self.utiDICp[node] = 0.0
+		
+		delta = 1.0
+		while (delta >= (epsilon*(1.0-0.9)/0.9)):
 			for i in (range(0,len(self.world))):
 				for node in self.world[i]:
+					self.utiDICp[node] = self.utiDIC[node]
 					maxnum = self.calcMaxOption(node)
-					utiprime = node.reward + 0.9*maxnum
-					#print node.x,node.y
-					if not(node in self.utiDIC):
-						self.utiDIC[node] = 0
-						#print self.utiDIC[node]
-					if abs(utiprime - self.utiDIC[node]) > sigma:
-						sigma = abs(utiprime - self.utiDIC[node])
-					self.utiDIC[node] = utiprime
+					self.utiDIC[node] = node.reward + 0.9*maxnum
 					if node.typeN == 2:
 						self.utiDIC[node] = 0
+			delta = 0.0
+			#maybe loop through dictionary
+			for i in (range(0,len(self.world))):
+				for node in self.world[i]:
+					if abs(self.utiDIC[node] - self.utiDICp[node]) > delta:
+						delta = abs(self.utiDIC[node] - self.utiDICp[node])
+			
 		print('\n'.join(['	'.join(['{0:.2f}'.format(self.utiDIC[item]) for item in row]) for row in self.world]))
+		
 	
 	def calcMaxOption(self, node):
 		adjlist = self.getAdj(node)
@@ -90,13 +98,13 @@ class WorldAstar:
 					else:
 						nodelook2 = 0.0
 					if (nodelook1 == 0.0) and (nodelook2 == 0.0):
-						listofvalues.append(0.8*(tempnode.reward) + 0.1*(nodelook1) + 0.1*(nodelook2))
+						listofvalues.append(0.8*(self.utiDICp[tempnode]) + 0.1*(nodelook1) + 0.1*(nodelook2))
 					elif nodelook1 == 0.0:
-						listofvalues.append(0.8*(tempnode.reward) + 0.1*(nodelook1) + 0.1*(nodelook2.reward))
+						listofvalues.append(0.8*(self.utiDICp[tempnode]) + 0.1*(nodelook1) + 0.1*(self.utiDICp[nodelook2]))
 					elif nodelook2 == 0.0:
-						listofvalues.append(0.8*(tempnode.reward) + 0.1*(nodelook1.reward) + 0.1*(nodelook2))
+						listofvalues.append(0.8*(self.utiDICp[tempnode]) + 0.1*(self.utiDICp[nodelook1]) + 0.1*(nodelook2))
 					else:
-						listofvalues.append(0.8*(tempnode.reward) + 0.1*(nodelook1.reward) + 0.1*(nodelook2.reward))
+						listofvalues.append(0.8*(self.utiDICp[tempnode]) + 0.1*(self.utiDICp[nodelook1]) + 0.1*(self.utiDICp[nodelook2]))
 			elif tempnode.y == node.y:
 				#look at changing x values for left and right rewards
 				if (tempnode.x >= 0 and tempnode.x < len(self.world)-1):
@@ -109,13 +117,13 @@ class WorldAstar:
 					else:
 						nodelook2 = 0.0
 					if (nodelook1 == 0.0) and (nodelook2 == 0.0):
-						listofvalues.append(0.8*(tempnode.reward) + 0.1*(nodelook1) + 0.1*(nodelook2))
+						listofvalues.append(0.8*(self.utiDICp[tempnode]) + 0.1*(nodelook1) + 0.1*(nodelook2))
 					elif nodelook1 == 0.0:
-						listofvalues.append(0.8*(tempnode.reward) + 0.1*(nodelook1) + 0.1*(nodelook2.reward))
+						listofvalues.append(0.8*(self.utiDICp[tempnode]) + 0.1*(nodelook1) + 0.1*(self.utiDICp[nodelook2]))
 					elif nodelook2 == 0.0:
-						listofvalues.append(0.8*(tempnode.reward) + 0.1*(nodelook1.reward) + 0.1*(nodelook2))
+						listofvalues.append(0.8*(self.utiDICp[tempnode]) + 0.1*(self.utiDICp[nodelook1]) + 0.1*(nodelook2))
 					else:
-						listofvalues.append(0.8*(tempnode.reward) + 0.1*(nodelook1.reward) + 0.1*(nodelook2.reward))
+						listofvalues.append(0.8*(self.utiDICp[tempnode]) + 0.1*(self.utiDICp[nodelook1]) + 0.1*(self.utiDICp[nodelook2]))
 		#the loop ran through the entire list of adj nodes, select max values
 		return max(listofvalues)
 	
@@ -137,13 +145,16 @@ class WorldAstar:
 	def getPath(self,node):
 		print "Path taken:"
 		stringArray = []
+		utiNUM = 0.0
 		while not(node.x == self.start.x and node.y == self.start.y):
 			stringArray.append(["(",node.x,",",node.y,")","Utility :",self.utiDIC[node]])
 			node = node.p
 		stringArray.append(["(",node.x,",",node.y,")","Utility :",self.utiDIC[node]])
 		for nodecoor in reversed(stringArray):
 			print nodecoor[0], nodecoor[1], nodecoor[2], nodecoor[3], nodecoor[4], nodecoor[5], nodecoor[6]
-			
+			utiNUM += nodecoor[6]
+		print "total utility:", utiNUM
+		
 	def Astar(self):
 		#open and closed lists defined in the class initializer
 		locationseval = 0
