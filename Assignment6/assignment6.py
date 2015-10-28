@@ -96,14 +96,6 @@ Conditionals Probabilities
 the calculations go here
 P(A|B) = [P(B|A)*P(A)]/P(B)
 '''
-
-def c_given_p_l(c, p, s):
-	numerator = c.prob["ps"]*p.prob["L"]*s.prob["T"]
-	numerator += c.prob["p~s"]*p.prob["L"]*s.prob["F"]
-	prob = numerator/p.prob["L"]
-	
-	list_prob["c_given_p_l"] = prob
-	return prob
 	
 def c_given_p_h(c, p, s):
 	numerator = c.prob["~ps"]*p.prob["H"]*s.prob["T"]
@@ -364,14 +356,8 @@ def main():
 			sys.exit(2)
 			
 	if flag == "-g": #conditional
-		if f_in == "c|p": #dn
-			print(c_given_p_l(c, p, s))
-		elif f_in == "c|~p": #dn
-			print(c_given_p_h(c, p, s))
-		elif f_in == "c|s": #dn
-			print(c_given_s(c, p, s))
-			
-		elif f_in == "~p|d":
+		
+		if f_in == "~p|d":
 			print(p_h_given_d(d, p, s, c))
 		elif f_in == "s|d":
 			print(s_given_d(d, p, s, c))
