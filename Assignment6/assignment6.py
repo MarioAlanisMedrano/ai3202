@@ -1,5 +1,6 @@
 #Assignment 6
 #Bayes Nets
+#worked with Brooke Robinson and Jenny Michael
 
 import getopt, sys, re
 
