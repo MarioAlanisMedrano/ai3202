@@ -177,7 +177,60 @@ def x_given_d(x, d, c):
 	return prob
 
 def x_given_s(x, c, p, s):
-	#WORKING ON THIS
+	numerator = x.prob["c"]*c.prob["ps"]*s.prob["T"]*p.prob["L"]
+	numerator += x.prob["c"]*c.prob["~ps"]*s.prob["T"]*p.prob["H"]
+	numerator += x.prob["~c"]*(1-c.prob["ps"])*s.prob["T"]*p.prob["L"]
+	numerator += x.prob["~c"]*(1-c.prob["~ps"])*s.prob["T"]*p.prob["H"]
+	denominator = c.prob["ps"]*s.prob["T"]*p.prob["L"]
+	denominator += c.prob["~ps"]*s.prob["T"]*p.prob["H"]
+	denominator += (1-c.prob["ps"])*s.prob["T"]*p.prob["L"]
+	denominator += (1-c.prob["~ps"])*s.prob["T"]*p.prob["H"]
+	prob = numerator/denominator
+	
+	list_prob["x_given_s"] = prob
+	return prob
+
+def p_h_given_c(c, p, s):
+	numerator = c_given_p_h(c, p, s)*p.prob["H"]
+	prob = numerator/list_prob["mar_c"]
+	
+	list_prob["p_h_given_c"] = prob
+	return prob
+	
+def s_given_c(c, p, s):
+	numerator = c_given_s(c, p, s)*s.prob["T"]
+	prob = numerator/list_prob["mar_c"]
+	
+	list_prob["s_given_c"] = prob
+	return prob
+
+def d_given_c(d, c, p, s):
+	numerator = c_given_d(d, c)*list_prob["d"]
+	prob = numerator/list_prob["mar_c"]
+	
+	list_prob["d_given_c"] = prob
+	return prob
+
+def p_h_given_c_s(c, s, p):
+	numerator = c.prob["~ps"]*s.prob["T"]*p.prob["H"]
+	denominator = c.prob["~ps"]*s.prob["T"]*p.prob["H"]
+	denominator += c.prob["ps"]*s.prob["T"]*p.prob["L"]
+	prob = numerator/denominator
+	
+	list_prob["p_h_given_c_s"] = prob
+	return prob
+
+def p_h_given_d_s(p, s, c, d):
+	numerator = d.prob["c"]*c.prob["~ps"]*p.prob["H"]*s.prob["T"]
+	numerator += d.prob["~c"]*(1-c.prob["~ps"])*p.prob["H"]*s.prob["T"]
+	denominator = d.prob["c"]*c.prob["~ps"]*p.prob["H"]*s.prob["T"]
+	denominator += d.prob["c"]*c.prob["ps"]*p.prob["L"]*s.prob["T"]
+	denominator += d.prob["~c"]*(1-c.prob["~ps"])*p.prob["H"]*s.prob["T"]
+	denominator += d.prob["~c"]*(1-c.prob["ps"])*p.prob["L"]*s.prob["T"]
+	prob = numerator/denominator
+	
+	list_prob["p_h_given_d_s"] = prob
+	return prob
 	
 	
 #END OF CONDITIONALS
@@ -262,6 +315,7 @@ def main():
 			print(c_given_p_h(c, p, s))
 		elif f_in == "c|s": #dn
 			print(c_given_s(c, p, s))
+			
 		elif f_in == "~p|d":
 			print(p_h_given_d(d, p, s, c))
 		elif f_in == "s|d":
@@ -272,6 +326,7 @@ def main():
 			print(x_given_d(x, d, c))
 		elif f_in  == "d|d":
 			print(1)
+			
 		elif f_in == "~p|s":
 			print(p.prob["H"])
 		elif f_in == "s|s":
@@ -280,5 +335,33 @@ def main():
 			print(c_given_s(c, p, s))
 		elif f_in == "x|s":
 			print(x_given_s(x, c, p, s))
+		elif f_in == "d|s":
+			print(d_given_s(d, p, s, c))
+			
+		elif f_in == "~p|c":
+			print(p_h_given_c(c, p, s))
+		elif f_in == "s|c":
+			print(s_given_c(c, p, s))
+		elif f_in == "c|c":
+			print(1)
+		elif f_in == "x|c":
+			print(x.prob["c"])
+		elif f_in == "d|c":
+			print(d_given_c(d, c, p, s))
+			
+		elif f_in == "~p|cs" or f_in == "~p|sc":
+			print(p_h_given_c_s(c, s, p))
+		elif f_in == "s|cs" or f_in == "s|sc":
+			print(1)
+		elif f_in == "c|cs" or f_in == "c|sc":
+			print(1)
+		elif f_in == "x|cs" or f_in == "x|sc":
+			print(x.prob["c"])
+		elif f_in == "d|cs" or f_in == "d|sc":
+			print(d_given_c(d, c, p, s))
+		
+		elif f_in == "~p|ds" or f_in == "~p|sd":
+			print(p_h_given_d_s(p, s, c, d))
+		
 if __name__ == "__main__":
 	main()
