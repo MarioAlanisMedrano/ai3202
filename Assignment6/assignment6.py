@@ -232,6 +232,31 @@ def p_h_given_d_s(p, s, c, d):
 	list_prob["p_h_given_d_s"] = prob
 	return prob
 	
+def c_given_d_s(d, p, s, c):
+	numerator = d.prob["c"]*c.prob["ps"]*p.prob["L"]*s.prob["T"]
+	numerator += d.prob["c"]*c.prob["~ps"]*p.prob["H"]*s.prob["T"]
+	denominator = d.prob["c"]*c.prob["ps"]*p.prob["L"]*s.prob["T"]
+	denominator += d.prob["c"]*c.prob["~ps"]*p.prob["H"]*s.prob["T"]
+	denominator += d.prob["~c"]*(1-c.prob["ps"])*p.prob["L"]*s.prob["T"]
+	denominator += d.prob["~c"]*(1-c.prob["~ps"])*p.prob["H"]*s.prob["T"]
+	prob = numerator/denominator
+	
+	list_prob["c_given_d_s"] = prob
+	return prob
+
+def x_given_d_s(x, c, p, s, d):
+	numerator = x.prob["c"]*d.prob["c"]*c.prob["~ps"]*p.prob["H"]*s.prob["T"]
+	numerator += x.prob["~c"]*d.prob["~c"]*(1-c.prob["~ps"])*p.prob["H"]*s.prob["T"]
+	numerator += x.prob["c"]*d.prob["c"]*c.prob["ps"]*p.prob["L"]*s.prob["T"]
+	numerator += x.prob["~c"]*d.prob["~c"]*(1-c.prob["ps"])*p.prob["L"]*s.prob["T"]
+	denominator = d.prob["c"]*c.prob["~ps"]*p.prob["H"]*s.prob["T"]
+	denominator += d.prob["~c"]*(1-c.prob["~ps"])*p.prob["H"]*s.prob["T"]
+	denominator += d.prob["c"]*c.prob["ps"]*p.prob["L"]*s.prob["T"]
+	denominator += d.prob["~c"]*(1-c.prob["ps"])*p.prob["L"]*s.prob["T"]
+	prob = numerator/denominator
+	
+	list_prob["x_given_d_s"] = prob
+	return prob
 	
 #END OF CONDITIONALS
 
@@ -362,6 +387,19 @@ def main():
 		
 		elif f_in == "~p|ds" or f_in == "~p|sd":
 			print(p_h_given_d_s(p, s, c, d))
+		elif f_in == "s|ds" or f_in == "s|sd":
+			print(1)
+		elif f_in == "c|ds" or f_in == "c|sd":
+			print(c_given_d_s(d, p, s, c))
+		elif f_in == "x|ds" or f_in == "x|sd":
+			print(x_given_d_s(x, c, p, s, d))
+		elif f_in == "d|ds" or f_in == "d|sd":
+			print(1)
+	
+	#if flag == "-j": #joint
+	
+	#do joint
+	#do -mD	
 		
 if __name__ == "__main__":
 	main()
