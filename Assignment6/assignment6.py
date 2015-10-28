@@ -258,6 +258,20 @@ def x_given_d_s(x, c, p, s, d):
 	list_prob["x_given_d_s"] = prob
 	return prob
 	
+def joint_PSG(p, s, c):
+	allp = []
+	allp.append(c.prob["ps"]*p.prob["L"]*s.prob["T"])
+	allp.append((1-c.prob["ps"])*p.prob["L"]*s.prob["T"])
+	allp.append(c.prob["~ps"]*p.prob["H"]*s.prob["T"])
+	allp.append((1-c.prob["~ps"])*p.prob["H"]*s.prob["T"])
+	allp.append(c.prob["p~s"]*p.prob["L"]*s.prob["F"])
+	allp.append((1-c.prob["p~s"])*p.prob["L"]*s.prob["F"])
+	allp.append(c.prob["~p~s"]*p.prob["H"]*s.prob["F"])
+	allp.append((1-c.prob["~p~s"])*p.prob["H"]*s.prob["F"])
+	
+	return allp
+	
+	
 #END OF CONDITIONALS
 
 def main():
@@ -276,15 +290,15 @@ def main():
 			#conditinal probability
 			flag = o
 			f_in = a
-		elif o in ("-j"): 
+		elif o in "-j": 
 			#joint probability
 			flag = o
 			f_in = a
-		elif o in ("-m"): 
+		elif o in "-m": 
 			#marginal probability
 			flag = o
 			f_in = a
-		elif o in ("-p"): #
+		elif o in "-p":
 			#set prior for p or s
 			#this code gets the first number after the "P", no spaces please
 			probIN = float(re.findall(".\d+",a[1:])[0])
@@ -301,8 +315,8 @@ def main():
 	c = nodes[2]
 	x = nodes[3]
 	d = nodes[4]
-	print('prob s::',s.prob["T"])
-	print('prob p::',p.prob["L"])
+	#print('prob s::',s.prob["T"])
+	#print('prob p::',p.prob["L"])
 	
 	#calculate marginal probabilities
 	mar_c(c,p,s)
@@ -314,25 +328,41 @@ def main():
 			print(p.prob["L"])
 		elif f_in == "~p":
 			print(p.prob["H"])
+		elif f_in == "P":
+			print(p.prob["L"],p.prob["H"])
+			
 		elif f_in == "s":
 			print(s.prob["T"])
 		elif f_in == "~s":
 			print(s.prob["F"])
+		elif f_in == "S":
+			print(s.prob["T"],s.prob["F"])
+			
 		elif f_in == "c":
 			print(list_prob["mar_c"])
 		elif f_in == "~c":
 			print(list_prob["~mar_c"])
+		elif f_in == "C":
+			print(list_prob["mar_c"],list_prob["~mar_c"])
+			
 		elif f_in == "x":
-			print(list_prob["mar_x"])
+			print(list_prob["x"])
 		elif f_in == "~x":
-			print(list_prob["~mar_x"])
+			print(list_prob["~x"])
+		elif f_in == "X":
+			print(list_prob["x"],list_prob["~x"])
+			
 		elif f_in == "d":
-			print(list_prob["mar_d"])
+			print(list_prob["d"])
 		elif f_in == "~d":
-			print(list_prob["~mar_d"])
+			print(list_prob["~d"])
+		elif f_in == "D":
+			print(list_prob["d"],list_prob["~d"])
+			
 		else:
 			print("Not a valid -m option")
 			sys.exit(2)
+			
 	if flag == "-g": #conditional
 		if f_in == "c|p": #dn
 			print(c_given_p_l(c, p, s))
@@ -395,11 +425,34 @@ def main():
 			print(x_given_d_s(x, c, p, s, d))
 		elif f_in == "d|ds" or f_in == "d|sd":
 			print(1)
+		
+		else:
+			print("Not a valid -g option")
+			sys.exit(2)
 	
-	#if flag == "-j": #joint
-	
-	#do joint
-	#do -mD	
+	if flag == "-j": #joint
+		if f_in == "PSC" or f_in == "PCS" or f_in == "CPS" or f_in == "CSP" or f_in == "SPC" or f_in == "SCP":
+			print(joint_PSG(p, s, c))
+		elif f_in == "psc":
+			print(c.prob["ps"]*p.prob["L"]*s.prob["T"])
+		elif f_in == "ps~c":
+			print(c.prob["ps"]*p.prob["L"]*s.prob["F"])
+		elif f_in == "p~sc":
+			print(c.prob["p~s"]*p.prob["L"]*s.prob["F"])
+		elif f_in == "~psc":
+			print(c.prob["~ps"]*p.prob["H"]*s.prob["T"])
+		elif f_in == "p~s~c":
+			print((1-c.prob["p~s"])*p.prob["L"]*s.prob["F"])
+		elif f_in == "~p~sc":
+			print(c.prob["~p~s"]*p.prob["H"]*s.prob["F"])
+		elif f_in == "~ps~c":
+			print((1-c.prob["~ps"])*p.prob["H"]*s.prob["T"])
+		elif f_in == "~p~s~c":
+			print((1-c.prob["~p~s"])*p.prob["H"]*s.prob["F"])
+		else:
+			print("Not a valid -j option")
+			sys.exit(2)
+			
 		
 if __name__ == "__main__":
 	main()
