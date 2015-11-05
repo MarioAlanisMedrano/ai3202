@@ -18,6 +18,42 @@ print("PRIOR SAMPLING")
 prob = {}
 count = {"c":0.0,"s|c":0.0,"s|~c":0.0,"r|c":0.0,"r|~c":0.0,"w|sr":0.0,"w|s~r":0.0,"w|~sr":0.0,"w|~s~r":0.0}
 i = 0
+#this way I attemped to not overcount, as per suggested by Brooke
+'''
+cloudy = False
+rain = False
+sprinkler = False
+while i <= 99:
+	#counts every samples in sets of 4
+	if samples[i] < 0.5:		#cloudy
+		count["c"] += 1.0
+		cloudy = True
+	if samples[i+2] < 0.1 and cloudy:		#sprinkler | cloudy
+		count["s|c"] += 1.0
+		sprinkler = True
+	if samples[i+2] < 0.5 and not(cloudy):		#sprinkler | ~cloudy
+		count["s|~c"] += 1.0
+		sprinkler = True
+	if samples[i+1] < 0.8 and cloudy:		#rain | cloudy
+		count["r|c"] += 1.0
+		rain = True
+	if samples[i+1] < 0.2 and not(cloudy):		#rain | ~cloudy
+		count["r|~c"] += 1.0
+		rain = True
+	if samples[i+3] < 0.99 and sprinkler and rain:		#wet | sprinkler rain
+		count["w|sr"] += 1.0
+	if samples[i+3] < 0.9 and sprinkler and not(rain):		#wet | sprinkler ~rain
+		count["w|s~r"] += 1.0
+	if samples[i+3] < 0.9 and not(sprinkler) and rain:		#wet | ~sprinkler rain
+		count["w|~sr"] += 1.0
+	if samples[i+3] == 0.0 and not(sprinkler) and not(rain):		#wet | ~sprinkler ~rain
+		count["w|~s~r"] += 1.0
+
+	i = i + 4
+'''
+
+#this is the original way I was counting the samples, I belive this is right
+#'''
 while i <= 99:
 	#counts every samples in sets of 4
 	if samples[i] < 0.5:		#cloudy
@@ -40,7 +76,7 @@ while i <= 99:
 		count["w|~s~r"] += 1.0
 
 	i = i + 4
-	
+#'''
 
 #1a
 prob["c"] = count["c"]/25.0
@@ -48,22 +84,18 @@ print("P(c = true)", prob["c"])
 
 
 #1b
-print("this is right")
 num = ((count["r|c"]/25.0)*prob["c"])
 den = ((count["r|c"]/25.0)*prob["c"]) + ((count["r|~c"]/25.0)*(1-prob["c"]))
 prob["r"] = den
 
-print(num,den, count["r|c"],count["r|c"]/25.0,count["r|~c"],count["r|~c"]/25.0)
+#print(num,den, count["r|c"],count["r|c"]/25.0,count["r|~c"],count["r|~c"]/25.0)
 prob["c|r"] = num/den
 print("P(c = true | r = true)",prob["c|r"])
 
 
 #1c
 prob["s"] = ((count["s|c"]/25.0)*prob["c"]) + ((count["s|~c"]/25.0)*(1-prob["c"]))
-print("P(s):", prob["s"])
-
 prob["w|s"] = ((count["w|sr"]/25.0)*prob["s"]*prob["r"]) + ((count["w|s~r"]/25.0)*prob["s"]*(1-prob["r"]))
-print("P(w|s):", prob["w|s"])
 
 num = (prob["w|s"]*prob["s"])
 den = prob["w|s"] + ((count["w|~sr"]/25.0)*(1-prob["s"])*prob["r"]) + ((count["w|~s~r"]/25.0)*(1-prob["s"])*(1-prob["r"]))
@@ -73,7 +105,13 @@ print("P(s = true | w = true)",prob["s|w"])
 
 
 #1d
-prob["s|cw"] = (count["s|c"] + count["w|sr"] + count["w|s~r"])/300.0
+#P(s|cw) = P(s,c,w)/P(c,w)
+#bellow is P(s,c,w)
+num = prob["w|s"]*prob["c"]*(count["s|c"]/25.0)
+#bellow is P(w|sr)*P(s|c)*P(r)*P(c)+ P(w|s~r)*P(s|c)*(1-P(r))*P(c)
+den = ((count["w|sr"]/25.0)*(count["s|c"]/25.0)*(count["r|c"]/25.0) + (count["w|s~r"]/25.0)*(count["s|c"]/25.0)*(1-(count["r|c"]/25.0)))*prob["c"]
+den += ((count["w|~sr"]/25.0)*(1-(count["s|c"]/25.0))*(count["r|c"]/25.0) + (count["w|~s~r"]/25.0)*(1-(count["s|c"]/25.0))*(1-(count["r|c"]/25.0)))*prob["c"]
+prob["s|cw"] = num/den
 print("P(s = true | c = true, w = true)",prob["s|cw"])
 
 #
