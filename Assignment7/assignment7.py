@@ -112,10 +112,14 @@ print("P(s = true | w = true)",prob["s|w"])
 #bellow is P(s,c,w)
 num = prob["w|s"]*prob["c"]*(count["s|c"]/25.0)
 #bellow is P(w|sr)*P(s|c)*P(r)*P(c)+ P(w|s~r)*P(s|c)*(1-P(r))*P(c)
-den = ((count["w|sr"]/25.0)*(count["s|c"]/25.0)*(count["r|c"]/25.0) + (count["w|s~r"]/25.0)*(count["s|c"]/25.0)*(1-(count["r|c"]/25.0)))*prob["c"]
-den += ((count["w|~sr"]/25.0)*(1-(count["s|c"]/25.0))*(count["r|c"]/25.0) + (count["w|~s~r"]/25.0)*(1-(count["s|c"]/25.0))*(1-(count["r|c"]/25.0)))*prob["c"]
-prob["s|cw"] = num/den
+den = ((count["w|sr"]/25.0)*(count["s|c"]/25.0)*(count["r|c"]/25.0) + (count["w|s~r"]/25.0)*(count["s|c"]/25.0)*(1-(count["r|c"]/25.0)))
+den += ((count["w|~sr"]/25.0)*(1-(count["s|c"]/25.0))*(count["r|c"]/25.0) + (count["w|~s~r"]/25.0)*(1-(count["s|c"]/25.0))*(1-(count["r|c"]/25.0)))
+prob["s|cw"] = num/1.0
 print("P(s = true | c = true, w = true)",prob["s|cw"])
+
+#P(s|wc) = P(swc)/P(wc)
+prob["swc"] = (.99*prob["s"]*prob["r"] + .9*prob["s"]*(1-prob["r"]))*.5*.1
+prob["wc"] = (.99*.1*.8 + .9*.1*(1-.8) + .9*(1-.1)*.8)*0.5
 
 
 #XXXXXXXXXXXXXXXXXXXX
@@ -142,12 +146,9 @@ prob["s|w"] = (prob["w|s"]*.5 + prob["w|s"]*.5)/prob["w"]
 print("P(s = true | w = true)",prob["s|w"])
 
 #P(s|wc) = P(swc)/P(wc)
-#P(swc) = [P(w|sr)P(s)P(r) + P(w|s~r)P(s)P(~r)]*[P(s|c)P(c)]
-#this is because we hold swc constant, the only thing changing is rain
-prob["swc"] = prob["w|s"]*.1*.5
-#P(wc) = [[P(w|sr)P(s)P(r) + P(w|s~r)P(s)(1-P(r)) + P(w|~sw)(1-P(s))P(r) + P(w|~s~w)(1-P(s))(1-P(r))]]*P(c)
-#since we care about w, and we hold c constant. this is equivalent to P(w)*P(c)
-prob["wc"] = prob["w"]*0.5
+prob["swc"] = (.99*prob["s"]*prob["r"] + .9*prob["s"]*(1-prob["r"]))*.5*.1
+prob["wc"] = (.99*.1*.8 + .9*.1*(1-.8) + .9*(1-.1)*.8)*0.5
+
 print("P(s = true | c = true, w = true)",prob["swc"]/prob["wc"])
 
 #XXXXXXXXXXXXXXXXXXXX
@@ -156,7 +157,7 @@ print("REJECTION SAMPLING")
 #XXXXXXXXXXXXXXXXXXXX
 
 
-samples = [random.random() for _ in xrange(1000000)]
+#samples = [random.random() for _ in xrange(1000000)]
 
 prob = {}
 count = [] #an array of arrays, [c,r,s,w] (bool) inside each index
